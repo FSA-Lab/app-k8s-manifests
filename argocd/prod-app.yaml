@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR_USERNAME/app-k8s-manifests.git
+    repoURL: https://github.com/FSA-Lab/app-k8s-manifests.git
     targetRevision: main
     path: k8s/overlays/prod
   destination:

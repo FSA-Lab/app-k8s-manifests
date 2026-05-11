@@ -6,6 +6,11 @@ namespace: prod
 resources:
   - ../../base
 
+patches:
+  - path: kong-patch.yaml
+  - path: prometheus-patch.yaml
+  - path: payment-service-patch.yaml
+
 images:
   - name: auth-service
     newName: yourdockerhub/auth-service
