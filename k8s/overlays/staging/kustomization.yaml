@@ -13,9 +13,42 @@ patches:
   - path: auth-service-config-patch.yaml
   - path: inventory-service-config-patch.yaml
   - path: order-service-config-patch.yaml
-  - path: grafana-service-patch.yaml
-  - path: jaeger-service-patch.yaml
-  - path: prometheus-service-patch.yaml
+  # Local testing: change NodePort services to ClusterIP
+  - target:
+      kind: Service
+      name: grafana
+    patch: |
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+      - op: remove
+        path: /spec/ports/0/nodePort
+  - target:
+      kind: Service
+      name: jaeger
+    patch: |
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+      - op: remove
+        path: /spec/ports/0/nodePort
+  - target:
+      kind: Service
+      name: prometheus
+    patch: |
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+      - op: remove
+        path: /spec/ports/0/nodePort
+  # Kong: increase memory limit for local K8s
+  - target:
+      kind: Deployment
+      name: kong
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
 
 images:
   - name: auth-service
