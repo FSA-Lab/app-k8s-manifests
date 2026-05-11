@@ -17,13 +17,13 @@ patches:
 images:
   - name: auth-service
     newName: hungnv2511/auth-service
-    newTag: "latest"
+    newTag: "5297c76"
   - name: inventory-service
     newName: hungnv2511/inventory-service
-    newTag: "latest"
+    newTag: "5297c76"
   - name: order-service
     newName: hungnv2511/order-service
-    newTag: "latest"
+    newTag: "5297c76"
   - name: payment-service
     newName: hungnv2511/payment-service
-    newTag: "latest"
+    newTag: "5297c76"
