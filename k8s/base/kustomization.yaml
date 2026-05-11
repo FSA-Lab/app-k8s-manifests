@@ -1,0 +1,69 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # App services
+  - auth-service/deployment.yaml
+  - auth-service/service.yaml
+  - auth-service/configmap.yaml
+  - inventory-service/deployment.yaml
+  - inventory-service/service.yaml
+  - inventory-service/configmap.yaml
+  - order-service/deployment.yaml
+  - order-service/service.yaml
+  - order-service/configmap.yaml
+  - payment-service/deployment.yaml
+  - payment-service/service.yaml
+  - payment-service/configmap.yaml
+
+  # Databases
+  - auth-db/deployment.yaml
+  - auth-db/service.yaml
+  - auth-db/pvc.yaml
+  - inventory-db/deployment.yaml
+  - inventory-db/service.yaml
+  - inventory-db/pvc.yaml
+  - order-db/deployment.yaml
+  - order-db/service.yaml
+  - order-db/pvc.yaml
+  - payment-db/deployment.yaml
+  - payment-db/service.yaml
+  - payment-db/pvc.yaml
+
+  # Infrastructure
+  - rabbitmq/deployment.yaml
+  - rabbitmq/service.yaml
+  - kong/deployment.yaml
+  - kong/service.yaml
+  - kong/configmap.yaml
+  - otel-collector/deployment.yaml
+  - otel-collector/service.yaml
+  - otel-collector/configmap.yaml
+  - jaeger/deployment.yaml
+  - jaeger/service.yaml
+  - prometheus/deployment.yaml
+  - prometheus/service.yaml
+  - prometheus/configmap.yaml
+  - grafana/deployment.yaml
+  - grafana/service.yaml
+  - grafana/configmap.yaml
+
+  # Migrations
+  - migrations/auth-migration.yaml
+  - migrations/inventory-migration.yaml
+  - migrations/order-migration.yaml
+  - migrations/payment-migration.yaml
+
+images:
+  - name: auth-service
+    newName: auth-service
+    newTag: "latest"
+  - name: inventory-service
+    newName: inventory-service
+    newTag: "latest"
+  - name: order-service
+    newName: order-service
+    newTag: "latest"
+  - name: payment-service
+    newName: payment-service
+    newTag: "latest"

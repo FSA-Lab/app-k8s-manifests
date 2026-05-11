@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: auth-migration
+  labels:
+    app: auth-migration
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: auth-migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migration
+          image: auth-service:latest
+          command: ["npx", "drizzle-kit", "push"]
+          envFrom:
+            - configMapRef:
+                name: auth-service-config
+            - secretRef:
+                name: auth-service-secrets

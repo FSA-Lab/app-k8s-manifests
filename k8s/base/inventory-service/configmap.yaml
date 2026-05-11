@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-service-config
+  labels:
+    app: inventory-service
+data:
+  OTEL_SERVICE_NAME: "inventory-service"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.infra.svc.cluster.local:4318"
