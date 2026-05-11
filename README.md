@@ -33,9 +33,15 @@ app-k8s-manifests/
 │   │
 │   └── overlays/
 │       ├── staging/
-│       │   └── kustomization.yaml     # staging namespace + image tags
+│       │   ├── kustomization.yaml     # staging namespace + image tags
+│       │   ├── kong-patch.yaml        # Kong URLs → staging
+│       │   ├── prometheus-patch.yaml  # Prometheus scrape targets → staging
+│       │   └── payment-service-patch.yaml  # AUTH_SERVICE_URL → staging
 │       └── prod/
-│           └── kustomization.yaml     # prod namespace + image tags
+│           ├── kustomization.yaml     # prod namespace + image tags
+│           ├── kong-patch.yaml        # Kong URLs → prod
+│           ├── prometheus-patch.yaml  # Prometheus scrape targets → prod
+│           └── payment-service-patch.yaml  # AUTH_SERVICE_URL → prod
 │
 └── argocd/
     ├── staging-app.yaml               # ArgoCD app → auto-sync to staging
