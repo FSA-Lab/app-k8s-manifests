@@ -36,12 +36,22 @@ app-k8s-manifests/
 │       │   ├── kustomization.yaml     # staging namespace + image tags
 │       │   ├── kong-patch.yaml        # Kong URLs → staging
 │       │   ├── prometheus-patch.yaml  # Prometheus scrape targets → staging
-│       │   └── payment-service-patch.yaml  # AUTH_SERVICE_URL → staging
+│       │   ├── payment-service-patch.yaml  # AUTH_SERVICE_URL → staging
+│       │   ├── auth-service-config-patch.yaml    # OTEL endpoint → staging
+│       │   ├── inventory-service-config-patch.yaml
+│       │   ├── order-service-config-patch.yaml
+│       │   ├── otel-collector-config-patch.yaml  # Jaeger export → staging
+│       │   └── grafana-datasources-patch.yaml    # Prometheus datasource → staging
 │       └── prod/
 │           ├── kustomization.yaml     # prod namespace + image tags
 │           ├── kong-patch.yaml        # Kong URLs → prod
 │           ├── prometheus-patch.yaml  # Prometheus scrape targets → prod
-│           └── payment-service-patch.yaml  # AUTH_SERVICE_URL → prod
+│           ├── payment-service-patch.yaml  # AUTH_SERVICE_URL → prod
+│           ├── auth-service-config-patch.yaml
+│           ├── inventory-service-config-patch.yaml
+│           ├── order-service-config-patch.yaml
+│           ├── otel-collector-config-patch.yaml
+│           └── grafana-datasources-patch.yaml
 │
 └── argocd/
     ├── staging-app.yaml               # ArgoCD app → auto-sync to staging
@@ -78,58 +88,35 @@ The ArgoCD Application manifests (`argocd/*.yaml`) already point to `https://git
 
 Secrets are created manually with `kubectl` — they are NOT committed to Git.
 
-**Infrastructure secrets (in `infra` namespace):**
+Use the `scripts/setup-k8s.sh` script from the app-k8s repo, or create manually:
 
 ```bash
-kubectl create namespace infra
+NAMESPACE=staging  # or prod
+
+kubectl create namespace $NAMESPACE
 
 # Postgres credentials (shared across all DBs)
 kubectl create secret generic postgres-secrets \
   --from-literal=POSTGRES_USER='root' \
-  --from-literal=POSTGRES_PASSWORD='your-secure-password' \
-  -n infra
+  --from-literal=POSTGRES_PASSWORD='<secure-password>' \
+  -n $NAMESPACE
 
 # Grafana admin password
 kubectl create secret generic grafana-secrets \
-  --from-literal=GF_SECURITY_ADMIN_PASSWORD='admin' \
-  -n infra
+  --from-literal=GF_SECURITY_ADMIN_PASSWORD='<grafana-password>' \
+  -n $NAMESPACE
+
+# Service secrets (one per service)
+for svc in auth inventory order payment; do
+  kubectl create secret generic ${svc}-service-secrets \
+    --from-literal=DATABASE_URL="postgres://root:<secure-password>@${svc}-db.${NAMESPACE}.svc.cluster.local:5432/${svc}" \
+    --from-literal=RABBITMQ_URL="amqp://rabbitmq.${NAMESPACE}.svc.cluster.local:5672" \
+    --from-literal=JWT_SECRET='<jwt-secret>' \
+    -n $NAMESPACE
+done
 ```
 
-**App service secrets (in `staging` namespace):**
-
-```bash
-kubectl create namespace staging
-
-# Auth service
-kubectl create secret generic auth-service-secrets \
-  --from-literal=DATABASE_URL='postgres://root:your-secure-password@auth-db.infra.svc.cluster.local:5432/auth' \
-  --from-literal=RABBITMQ_URL='amqp://rabbitmq.infra.svc.cluster.local:5672' \
-  --from-literal=JWT_SECRET='your-jwt-secret' \
-  -n staging
-
-# Inventory service
-kubectl create secret generic inventory-service-secrets \
-  --from-literal=DATABASE_URL='postgres://root:your-secure-password@inventory-db.infra.svc.cluster.local:5432/inventory' \
-  --from-literal=RABBITMQ_URL='amqp://rabbitmq.infra.svc.cluster.local:5672' \
-  --from-literal=JWT_SECRET='your-jwt-secret' \
-  -n staging
-
-# Order service
-kubectl create secret generic order-service-secrets \
-  --from-literal=DATABASE_URL='postgres://root:your-secure-password@order-db.infra.svc.cluster.local:5432/order' \
-  --from-literal=RABBITMQ_URL='amqp://rabbitmq.infra.svc.cluster.local:5672' \
-  --from-literal=JWT_SECRET='your-jwt-secret' \
-  -n staging
-
-# Payment service
-kubectl create secret generic payment-service-secrets \
-  --from-literal=DATABASE_URL='postgres://root:your-secure-password@payment-db.infra.svc.cluster.local:5432/payment' \
-  --from-literal=RABBITMQ_URL='amqp://rabbitmq.infra.svc.cluster.local:5672' \
-  --from-literal=JWT_SECRET='your-jwt-secret' \
-  -n staging
-```
-
-**Repeat for `prod` namespace** with different passwords.
+**Repeat for each namespace** (`staging`, `prod`) with different passwords.
 
 ### 3. Configure ArgoCD Access
 
@@ -188,10 +175,9 @@ kustomize build k8s/overlays/staging
 kustomize build k8s/overlays/prod
 
 # Check cluster resources
-kubectl get pods -n infra
 kubectl get pods -n staging
 kubectl get pods -n prod
-kubectl get svc -n infra    # Kong external IP
+kubectl get svc -n staging   # Kong external IP
 
 # Check ArgoCD sync status
 argocd app get app-staging
@@ -202,27 +188,29 @@ argocd app get app-prod
 
 ## Cluster Layout
 
+Each namespace (staging, prod) is **self-contained** — databases, infrastructure, and services all deploy into the same namespace via the Kustomize overlay. This keeps each environment independent.
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Azure AKS Cluster                                       │
 │                                                          │
-│  infra namespace (shared)                                │
-│  ┌─────────────────────────────────────────────────┐    │
-│  │ auth-db, inventory-db, order-db, payment-db      │    │
-│  │ rabbitmq, kong (LoadBalancer)                    │    │
-│  │ otel-collector, jaeger, prometheus, grafana      │    │
-│  └─────────────────────────────────────────────────┘    │
-│                                                          │
-│  staging namespace              prod namespace            │
-│  ┌───────────────────┐      ┌───────────────────┐      │
-│  │ auth-service       │      │ auth-service      │      │
-│  │ inventory-service  │      │ inventory-service │      │
-│  │ order-service      │      │ order-service     │      │
-│  │ payment-service    │      │ payment-service   │      │
-│  │ migration jobs (4) │      │ migration jobs (4)│      │
-│  └───────────────────┘      └───────────────────┘      │
+│  staging namespace               prod namespace          │
+│  ┌───────────────────────┐    ┌───────────────────────┐ │
+│  │ auth-db, inventory-db  │    │ auth-db, inventory-db  │ │
+│  │ order-db, payment-db   │    │ order-db, payment-db   │ │
+│  │ rabbitmq, kong         │    │ rabbitmq, kong         │ │
+│  │ otel-collector, jaeger │    │ otel-collector, jaeger │ │
+│  │ prometheus, grafana    │    │ prometheus, grafana    │ │
+│  │ auth-service           │    │ auth-service           │ │
+│  │ inventory-service      │    │ inventory-service      │ │
+│  │ order-service          │    │ order-service          │ │
+│  │ payment-service        │    │ payment-service        │ │
+│  │ migration jobs (4)     │    │ migration jobs (4)     │ │
+│  └───────────────────────┘    └───────────────────────┘ │
 └─────────────────────────────────────────────────────────┘
 ```
+
+The base ConfigMaps reference `.infra.svc.cluster.local` as a placeholder. Each overlay patches these to the correct namespace (staging or prod).
 
 ### Networking
 

@@ -15,45 +15,17 @@ patches:
   - path: order-service-config-patch.yaml
   - path: otel-collector-config-patch.yaml
   - path: grafana-datasources-patch.yaml
-  # Production: use ClusterIP, expose via ingress instead of NodePort
-  - target:
-      kind: Service
-      name: grafana
-    patch: |
-      - op: replace
-        path: /spec/type
-        value: ClusterIP
-      - op: remove
-        path: /spec/ports/0/nodePort
-  - target:
-      kind: Service
-      name: jaeger
-    patch: |
-      - op: replace
-        path: /spec/type
-        value: ClusterIP
-      - op: remove
-        path: /spec/ports/0/nodePort
-  - target:
-      kind: Service
-      name: prometheus
-    patch: |
-      - op: replace
-        path: /spec/type
-        value: ClusterIP
-      - op: remove
-        path: /spec/ports/0/nodePort
 
 images:
   - name: auth-service
-    newName: <YOUR_REGISTRY>/auth-service
+    newName: hungnv2511/auth-service
     newTag: "latest"
   - name: inventory-service
-    newName: <YOUR_REGISTRY>/inventory-service
+    newName: hungnv2511/inventory-service
     newTag: "latest"
   - name: order-service
-    newName: <YOUR_REGISTRY>/order-service
+    newName: hungnv2511/order-service
     newTag: "latest"
   - name: payment-service
-    newName: <YOUR_REGISTRY>/payment-service
+    newName: hungnv2511/payment-service
     newTag: "latest"
