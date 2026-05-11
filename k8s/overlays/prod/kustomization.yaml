@@ -10,17 +10,50 @@ patches:
   - path: kong-patch.yaml
   - path: prometheus-patch.yaml
   - path: payment-service-patch.yaml
+  - path: auth-service-config-patch.yaml
+  - path: inventory-service-config-patch.yaml
+  - path: order-service-config-patch.yaml
+  - path: otel-collector-config-patch.yaml
+  - path: grafana-datasources-patch.yaml
+  # Production: use ClusterIP, expose via ingress instead of NodePort
+  - target:
+      kind: Service
+      name: grafana
+    patch: |
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+      - op: remove
+        path: /spec/ports/0/nodePort
+  - target:
+      kind: Service
+      name: jaeger
+    patch: |
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+      - op: remove
+        path: /spec/ports/0/nodePort
+  - target:
+      kind: Service
+      name: prometheus
+    patch: |
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+      - op: remove
+        path: /spec/ports/0/nodePort
 
 images:
   - name: auth-service
-    newName: yourdockerhub/auth-service
+    newName: <YOUR_REGISTRY>/auth-service
     newTag: "latest"
   - name: inventory-service
-    newName: yourdockerhub/inventory-service
+    newName: <YOUR_REGISTRY>/inventory-service
     newTag: "latest"
   - name: order-service
-    newName: yourdockerhub/order-service
+    newName: <YOUR_REGISTRY>/order-service
     newTag: "latest"
   - name: payment-service
-    newName: yourdockerhub/payment-service
+    newName: <YOUR_REGISTRY>/payment-service
     newTag: "latest"
