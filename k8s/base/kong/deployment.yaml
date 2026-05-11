@@ -33,6 +33,8 @@ spec:
               value: "/dev/stderr"
             - name: KONG_ADMIN_ERROR_LOG
               value: "/dev/stderr"
+            - name: KONG_NGINX_WORKER_PROCESSES
+              value: "2"
           volumeMounts:
             - name: kong-config
               mountPath: /kong
@@ -41,7 +43,7 @@ spec:
               memory: "128Mi"
               cpu: "100m"
             limits:
-              memory: "256Mi"
+              memory: "512Mi"
               cpu: "500m"
       volumes:
         - name: kong-config

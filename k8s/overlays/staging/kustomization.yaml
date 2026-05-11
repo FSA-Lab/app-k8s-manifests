@@ -10,17 +10,20 @@ patches:
   - path: kong-patch.yaml
   - path: prometheus-patch.yaml
   - path: payment-service-patch.yaml
+  - path: auth-service-config-patch.yaml
+  - path: inventory-service-config-patch.yaml
+  - path: order-service-config-patch.yaml
 
 images:
   - name: auth-service
-    newName: yourdockerhub/auth-service
+    newName: hungnv2511/auth-service
     newTag: "latest"
   - name: inventory-service
-    newName: yourdockerhub/inventory-service
+    newName: hungnv2511/inventory-service
     newTag: "latest"
   - name: order-service
-    newName: yourdockerhub/order-service
+    newName: hungnv2511/order-service
     newTag: "latest"
   - name: payment-service
-    newName: yourdockerhub/payment-service
+    newName: hungnv2511/payment-service
     newTag: "latest"
