@@ -14,6 +14,7 @@ patches:
   - path: inventory-service-config-patch.yaml
   - path: order-service-config-patch.yaml
   - path: otel-collector-config-patch.yaml
+  - path: grafana-datasources-patch.yaml
   # Local testing: change NodePort services to ClusterIP
   - target:
       kind: Service
