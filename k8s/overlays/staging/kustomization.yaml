@@ -91,10 +91,13 @@ patches:
         value:
           name: PGDATA
           value: /var/lib/postgresql/data/pgdata
-      - op: remove
+      - op: replace
         path: /spec/template/spec/tolerations
-      - op: remove
+        value: []
+      - op: replace
         path: /spec/template/spec/nodeSelector
+        value:
+          kubernetes.azure.com/agentpool: system
   - target:
       kind: Deployment
       name: order-db
