@@ -41,6 +41,9 @@ resources:
   - otel-collector/configmap.yaml
   - jaeger/deployment.yaml
   - jaeger/service.yaml
+  - loki/deployment.yaml
+  - loki/service.yaml
+  - loki/configmap.yaml
   - prometheus/deployment.yaml
   - prometheus/service.yaml
   - prometheus/configmap.yaml

@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: grafana-datasources
 data:
-  prometheus.yml: |
+  datasources.yml: |
     apiVersion: 1
     datasources:
       - name: Prometheus
@@ -11,3 +11,22 @@ data:
         access: proxy
         url: http://prometheus.staging.svc.cluster.local:9090
         isDefault: true
+      - name: Jaeger
+        type: jaeger
+        access: proxy
+        url: http://jaeger.staging.svc.cluster.local:16686
+        uid: jaeger
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki.staging.svc.cluster.local:3100
+        jsonData:
+          derivedFields:
+            - datasourceUid: jaeger
+              matcherRegex: "trace_id\":\"([a-f0-9]+)\""
+              name: TraceID
+              url: "$${__value.raw}"
+            - datasourceUid: jaeger
+              matcherRegex: "trace_id\":\"([a-f0-9]+)\""
+              name: View in Jaeger
+              url: "http://localhost:16686/trace/$${__value.raw}"

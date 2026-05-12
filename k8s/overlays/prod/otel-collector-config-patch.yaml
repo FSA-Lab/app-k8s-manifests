@@ -15,9 +15,14 @@ data:
         endpoint: jaeger.prod.svc.cluster.local:4317
         tls:
           insecure: true
+      otlphttp/loki:
+        endpoint: http://loki.prod.svc.cluster.local:3100/otlp
 
     service:
       pipelines:
         traces:
           receivers: [otlp]
           exporters: [otlp/jaeger]
+        logs:
+          receivers: [otlp]
+          exporters: [otlphttp/loki]
