@@ -66,6 +66,55 @@ patches:
         path: /spec/template/spec/nodeSelector
         value:
           kubernetes.azure.com/agentpool: apps
+  # Fix PVC lost+found issue for Postgres - use subdirectory
+  - target:
+      kind: Deployment
+      name: auth-db
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+        value: /var/lib/postgresql/data/pgdata
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+  - target:
+      kind: Deployment
+      name: inventory-db
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+        value: /var/lib/postgresql/data/pgdata
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+  - target:
+      kind: Deployment
+      name: order-db
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+        value: /var/lib/postgresql/data/pgdata
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+  - target:
+      kind: Deployment
+      name: payment-db
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
+        value: /var/lib/postgresql/data/pgdata
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
   # Same tolerations for migration Jobs
   - target:
       kind: Job
