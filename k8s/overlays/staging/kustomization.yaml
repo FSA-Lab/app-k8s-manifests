@@ -66,14 +66,14 @@ patches:
         path: /spec/template/spec/nodeSelector
         value:
           kubernetes.azure.com/agentpool: apps
-  # Fix PVC lost+found issue for Postgres - use subdirectory
+  # Fix PVC lost+found issue for Postgres - mount PVC higher, use PGDATA
   - target:
       kind: Deployment
       name: auth-db
     patch: |
       - op: replace
         path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
-        value: /var/lib/postgresql/data/pgdata
+        value: /var/lib/postgresql
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
@@ -85,7 +85,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
-        value: /var/lib/postgresql/data/pgdata
+        value: /var/lib/postgresql
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
@@ -97,7 +97,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
-        value: /var/lib/postgresql/data/pgdata
+        value: /var/lib/postgresql
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
@@ -109,7 +109,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/template/spec/containers/0/volumeMounts/0/mountPath
-        value: /var/lib/postgresql/data/pgdata
+        value: /var/lib/postgresql
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
