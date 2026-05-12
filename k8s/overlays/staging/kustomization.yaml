@@ -51,6 +51,36 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
         value: 512Mi
+  # Schedule app workloads on the apps node pool
+  - target:
+      kind: Deployment
+    patch: |
+      - op: add
+        path: /spec/template/spec/tolerations
+        value:
+          - key: workload
+            operator: Equal
+            value: apps
+            effect: NoSchedule
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          kubernetes.azure.com/agentpool: apps
+  # Same tolerations for migration Jobs
+  - target:
+      kind: Job
+    patch: |
+      - op: add
+        path: /spec/template/spec/tolerations
+        value:
+          - key: workload
+            operator: Equal
+            value: apps
+            effect: NoSchedule
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          kubernetes.azure.com/agentpool: apps
 
 images:
   - name: auth-service
